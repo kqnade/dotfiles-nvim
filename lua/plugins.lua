@@ -10,14 +10,37 @@ return {
   },
   {
     'nvim-telescope/telescope.nvim', tag = '0.1.2', cmd = 'Telescope', keys = {'<leader>ff', '<leader>fg', '<leader>fb', '<leader>fh'},
-      dependencies = { 'nvim-lua/plenary.nvim' }
+    dependencies = { 'nvim-lua/plenary.nvim' },
+    config = function()
+      require("telescope").setup{
+        defaults = {
+          mappings = {
+            i = {
+              ["<ESC>"] = require("telescope.actions").close
+            },
+          },
+        }
+      }    
+    end
+  },
+  {
+    "onsails/lspkind.nvim", event = 'VeryLazy',
+    config = function()
+      local lspkind = require("lspkind")
+	lspkind.init({
+  	symbol_map = {
+    	  Copilot = "",
+  	},
+      })
+      vim.api.nvim_set_hl(0, "CmpItemKindCopilot", {fg ="#6CC644"})
+    end
   },
   {
     "nvim-treesitter/nvim-treesitter",
     event = {'BufRead', 'BufEnter', 'TextChanged', 'BufWinEnter', 'VimResized'},
     build = function()
-        require("nvim-treesitter.install").update({ with_sync = true })
-    end,
+      require("nvim-treesitter.install").update({ with_sync = true })
+    end
   },
   {
     "folke/noice.nvim",
@@ -54,6 +77,24 @@ return {
     end
   },
   {
+    "zbirenbaum/copilot.lua",
+    cmd = "Copilot",
+    event = "InsertEnter",
+    config = function()
+      require("copilot").setup({
+        suggestion = { enabled = false },
+        panel = { enabled = false },
+      })
+    end, 
+  },
+  {
+    "zbirenbaum/copilot-cmp",
+    event = {'InsertEnter', 'cmdlineEnter'},
+    config = function ()
+      require("copilot_cmp").setup()
+    end
+  },
+  {
 	"hrsh7th/nvim-cmp",
   event = {'InsertEnter', 'cmdlineEnter'},
 	  dependencies = {
@@ -65,6 +106,8 @@ return {
 		  "saadparwaiz1/cmp_luasnip",
 		  "L3MON4D3/LuaSnip",
       "hrsh7th/cmp-emoji",
+      "kdheepak/cmp-latex-symbols",
+      
       "hrsh7th/cmp-nvim-lsp"
 	  },
     config = function()
@@ -89,10 +132,17 @@ return {
 			  ["<CR>"] = cmp.mapping.confirm({ select = true }), -- Accept currently selected item. Set `select` to `false` to only confirm explicitly selected items.
 		  }),
 		  sources = cmp.config.sources({
+        { name = "copilot", group_index = 2 },
 			  { name = "nvim_lsp" },
 			  { name = "nvim_lua" },
 			  { name = "luasnip" }, -- For luasnip users.
 			  -- { name = "orgmode" },
+        {
+          name = "latex_symbols",
+          option = {
+            strategy = 0, -- mixed
+          },
+        },
 		  }, {
 			  { name = "buffer" },
 			  { name = "path" },
